@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Advanced Todo App with Full-Stack Features
 
 A comprehensive full-stack web application for managing todo lists with advanced features, built with React, Node.js, Express, and MongoDB. This app includes enterprise-level features like rate limiting, comprehensive validation, error handling, and enhanced user experience.
@@ -282,3 +283,6 @@ Built with modern web technologies for a comprehensive todo management experienc
 **Last Updated**: July 2025
 
 **Version**: 2.0.0 - Enhanced with Advanced Features 
+=======
+# myToDo-Application
+>>>>>>> cc0a8298e5ac9f61658a6dfd72531ce3733a808c

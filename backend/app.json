@@ -1,0 +1,35 @@
+{
+  "name": "todo-app-backend",
+  "description": "Todo App Backend API",
+  "repository": "https://github.com/Nithin0525/myToDo-Application",
+  "keywords": ["node", "express", "mongodb", "todo", "api"],
+  "env": {
+    "PORT": {
+      "description": "Port for the application",
+      "value": "5001"
+    },
+    "MONGO_URI": {
+      "description": "MongoDB connection string",
+      "value": "mongodb+srv://Nithin:nysv%402444@cluster0.ay94z6o.mongodb.net/todo-app?retryWrites=true&w=majority&appName=Cluster0"
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT tokens",
+      "generator": "secret"
+    },
+    "NODE_ENV": {
+      "description": "Environment",
+      "value": "production"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+} 

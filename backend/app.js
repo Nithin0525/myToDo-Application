@@ -63,6 +63,16 @@ app.get('/', (req, res) => {
   res.send('API is working!');
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Todo App API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // 404 handler
 app.use('*', notFound);
 

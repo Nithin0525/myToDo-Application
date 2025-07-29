@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_CONFIG from './config';
 
 function TodoApp() {
   const [todos, setTodos] = useState([]);
@@ -29,7 +30,7 @@ function TodoApp() {
 
   // Configure axios with auth header - get fresh token on each request
   const api = axios.create({
-    baseURL: 'http://localhost:5001/api'
+    baseURL: API_CONFIG.BASE_URL
   });
 
   // Add request interceptor to include fresh token

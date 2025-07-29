@@ -24,20 +24,9 @@ const app = express();
 app.use(helmet());
 app.use(xss());
 
-// Rate limiting
-app.use('/api/', generalLimiter);
-app.use('/api/login', authLimiter);
-// Remove strict rate limiting for registration to allow testing
-// app.use('/api/register', authLimiter);
-app.use('/api/todos', userLimiter);
-app.use('/api/todos', todoCreationLimiter);
-
-// Rate limit status headers
-app.use('/api/', rateLimitStatus);
-
 // ✅ Configure CORS to allow frontend on any port
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+  origin: true, // Allow all origins temporarily
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -49,21 +38,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Input sanitization
 app.use(sanitize);
 
-// Routes
-const authRoutes = require('./routes/auth');
-const todoRoutes = require('./routes/todos');
-const adminRoutes = require('./routes/admin');
-
-app.use('/api', authRoutes);
-app.use('/api/todos', todoRoutes);
-app.use('/api/admin', adminRoutes);
-
 // Test route
 app.get('/', (req, res) => {
   res.send('API is working!');
 });
 
-// Health check endpoint
+// Health check endpoint (before rate limiting)
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'success',
@@ -72,6 +52,26 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });
+
+// Rate limiting (after health check)
+app.use('/api/', generalLimiter);
+app.use('/api/login', authLimiter);
+// Remove strict rate limiting for registration to allow testing
+// app.use('/api/register', authLimiter);
+app.use('/api/todos', userLimiter);
+app.use('/api/todos', todoCreationLimiter);
+
+// Rate limit status headers
+app.use('/api/', rateLimitStatus);
+
+// Routes
+const authRoutes = require('./routes/auth');
+const todoRoutes = require('./routes/todos');
+const adminRoutes = require('./routes/admin');
+
+app.use('/api', authRoutes);
+app.use('/api/todos', todoRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', notFound);

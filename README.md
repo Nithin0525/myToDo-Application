@@ -1,7 +1,27 @@
-<<<<<<< HEAD
 # Advanced Todo App with Full-Stack Features
 
 A comprehensive full-stack web application for managing todo lists with advanced features, built with React, Node.js, Express, and MongoDB. This app includes enterprise-level features like rate limiting, comprehensive validation, error handling, and enhanced user experience.
+
+## Recent Updates (Latest Version)
+
+### Security Enhancements
+- **Email-Password Validation**: Prevents users from using the same value for email and password during registration
+- **Case-Insensitive Validation**: Email and password comparison is case-insensitive for better security
+- **Real-time Validation**: Frontend validation updates immediately when email or password changes
+- **Backend Security**: Server-side validation prevents bypassing frontend checks
+
+### Code Cleanup
+- **Removed Test Files**: Cleaned up all test and debug files for production
+- **Removed IDE Settings**: Eliminated .vscode and .idea directories
+- **Removed System Files**: Cleaned up .DS_Store and other system files
+- **Optimized Structure**: Streamlined project structure for better maintenance
+- **Removed Debug Logs**: Cleaned up unnecessary console.log statements
+
+### Validation Improvements
+- **Enhanced Password Validation**: Added email-password match prevention
+- **Cross-field Validation**: Password field re-validates when email changes
+- **Clear Error Messages**: User-friendly validation feedback
+- **Comprehensive Backend Validation**: Joi schema validation with custom rules
 
 ## Features
 
@@ -11,6 +31,7 @@ A comprehensive full-stack web application for managing todo lists with advanced
 - **Rate Limiting**: Protection against brute force attacks
 - **Input Sanitization**: XSS protection and data validation
 - **CORS Protection**: Secure cross-origin requests
+- **Email-Password Validation**: Prevents using email as password
 
 ### Todo Management
 - **CRUD Operations**: Create, read, update, delete todos
@@ -182,8 +203,9 @@ npm start
 
 ### Validation Rules
 - **Username**: 3-20 characters, alphanumeric + underscore, starts with letter
-- **Email**: Valid format, common domain validation
+- **Email**: Valid format, common domain validation (Gmail, Yahoo, Hotmail, Outlook)
 - **Password**: 8+ characters, uppercase, lowercase, number, special character
+- **Email-Password Match**: Password cannot be the same as email address
 - **Todo Title**: 1-255 characters, required
 - **Description**: Optional, max 1000 characters
 - **Tags**: Max 10 tags, 20 characters each
@@ -196,39 +218,91 @@ npm start
 
 ## Deployment
 
-### Environment Variables
+### Backend Deployment - Render
+
+1. **Create render.yaml file** in `todo-app/backend/`:
+```yaml
+services:
+  - type: web
+    name: todo-app-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: MONGO_URI
+        value: mongodb+srv://username:password@cluster.mongodb.net/todo-app
+      - key: JWT_SECRET
+        value: your_super_secret_jwt_key_here
+```
+
+2. **Deploy to Render**:
+   - Connect your GitHub repository to Render
+   - Render will automatically detect the render.yaml file
+   - Set environment variables in Render dashboard
+   - Deploy automatically on git push
+
+### Frontend Deployment - Netlify
+
+1. **Build the frontend**:
+```bash
+cd todo-app/frontend
+npm run build
+```
+
+2. **Manual Deployment**:
+   - Go to Netlify dashboard
+   - Drag and drop the `build` folder from `todo-app/frontend/build/`
+   - Netlify will automatically deploy your site
+   - Set custom domain if needed
+
+3. **Environment Variables**:
+   - Set `REACT_APP_API_URL` to your Render backend URL
+   - Example: `https://your-backend-name.onrender.com`
+
+### Environment Configuration
+
+**Backend Environment Variables**:
 ```env
-# Production
 NODE_ENV=production
 PORT=5001
 MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/todo-app
 JWT_SECRET=your_super_secret_jwt_key_here
 ```
 
-### Backend Deployment (Heroku/Railway)
-```bash
-cd todo-app/backend
-# Set environment variables in your hosting platform
-git push heroku main
+**Frontend Environment Variables**:
+```env
+REACT_APP_API_URL=https://your-backend-name.onrender.com
 ```
 
-### Frontend Deployment (Vercel/Netlify)
-```bash
-cd todo-app/frontend
-npm run build
-# Deploy the build folder
-```
+### Deployment URLs
+- **Backend**: `https://your-backend-name.onrender.com`
+- **Frontend**: `https://your-site-name.netlify.app`
+
+## Security Features
+
+### Authentication Security
+- **JWT Tokens**: Secure token-based authentication
+- **Password Hashing**: bcryptjs with salt rounds
+- **Email-Password Validation**: Prevents using email as password
+- **Rate Limiting**: Protection against brute force attacks
+- **Input Sanitization**: XSS and injection protection
+
+### Data Validation
+- **Frontend Validation**: Real-time user feedback
+- **Backend Validation**: Server-side security
+- **Schema Validation**: Joi validation for all inputs
+- **Error Handling**: Secure error messages
 
 ## Testing
 
-### Backend API Tests
-```bash
-cd todo-app/backend
-node test-features.js
-```
-
 ### Manual Testing Checklist
 - User registration and login
+- Email-password validation
 - Todo CRUD operations
 - Search and filtering
 - Bulk actions
@@ -236,23 +310,38 @@ node test-features.js
 - Rate limiting
 - Input validation
 - Responsive design
+- Dark mode functionality
 
-## Screenshots & Features
+### Security Testing
+- Email-password match prevention
+- Rate limiting effectiveness
+- Input validation bypass attempts
+- Authentication token security
+- XSS protection testing
 
-### Core Features
-- **Authentication**: Secure login/register system
-- **Todo Management**: Full CRUD with advanced features
-- **Search & Filter**: Real-time search with multiple filters
-- **Bulk Operations**: Multi-select and batch actions
-- **Responsive Design**: Works on all devices
+## Project Structure
 
-### Advanced Features
-- **Rate Limiting**: Protection against abuse
-- **Input Validation**: Comprehensive data validation
-- **Error Handling**: Graceful error management
-- **Export/Import**: Data portability
-- **Templates**: Quick todo setup
-- **Dark Mode**: Theme customization
+```
+todo-app/
+├── backend/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── app.js
+│   ├── server.js
+│   ├── render.yaml
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── App.js
+│   │   └── index.js
+│   ├── public/
+│   ├── build/
+│   └── package.json
+└── README.md
+```
 
 ## Contributing
 
@@ -267,6 +356,7 @@ node test-features.js
 - Add tests for new features
 - Update documentation
 - Test on multiple devices
+- Ensure security best practices
 
 ## License
 
@@ -280,9 +370,6 @@ Built with modern web technologies for a comprehensive todo management experienc
 
 **Status**: Production Ready with Enterprise Features
 
-**Last Updated**: July 2025
+**Last Updated**: January 2025
 
-**Version**: 2.0.0 - Enhanced with Advanced Features 
-=======
-# myToDo-Application
->>>>>>> cc0a8298e5ac9f61658a6dfd72531ce3733a808c
+**Version**: 2.1.0 - Enhanced Security with Email-Password Validation 

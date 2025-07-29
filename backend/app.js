@@ -56,7 +56,7 @@ app.get('/api/health', (req, res) => {
 // Rate limiting (after health check)
 app.use('/api/', generalLimiter);
 app.use('/api/login', authLimiter);
-// Remove strict rate limiting for registration to allow testing
+
 // app.use('/api/register', authLimiter);
 app.use('/api/todos', userLimiter);
 app.use('/api/todos', todoCreationLimiter);

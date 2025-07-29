@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import API_CONFIG from '../config';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -17,7 +18,7 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/admin/stats');
+      const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADMIN_STATS}`);
       setStats(response.data);
     } catch (error) {
       toast.error('Failed to load statistics');
@@ -26,7 +27,7 @@ const AdminDashboard = () => {
 
   const loadUsers = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/admin/users?page=${currentPage}&search=${searchTerm}`);
+      const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADMIN_USERS}?page=${currentPage}&search=${searchTerm}`);
       setUsers(response.data.users);
       setTotalPages(response.data.totalPages);
     } catch (error) {
@@ -38,7 +39,7 @@ const AdminDashboard = () => {
 
   const updateUserRole = async (userId, newRole) => {
     try {
-      await axios.put(`http://localhost:5001/api/admin/users/${userId}/role`, { role: newRole });
+      await axios.put(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADMIN_USERS}/${userId}/role`, { role: newRole });
       toast.success('User role updated successfully');
       loadUsers(); // Refresh the list
     } catch (error) {
@@ -49,7 +50,7 @@ const AdminDashboard = () => {
   const deleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       try {
-        await axios.delete(`http://localhost:5001/api/admin/users/${userId}`);
+        await axios.delete(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADMIN_USERS}/${userId}`);
         toast.success('User deleted successfully');
         loadUsers(); // Refresh the list
         loadStats(); // Refresh stats

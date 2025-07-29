@@ -1,8 +1,5 @@
 const rateLimit = require('express-rate-limit');
 
-// Note: Redis is optional for rate limiting - using memory store by default
-console.log('Rate limiting configured with memory store (Redis not required)');
-
 // General rate limiter
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

@@ -2,28 +2,16 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import API_CONFIG from './config';
 
-function Register({ onSwitchToSignin }) {
+function Signin({ onSwitchToRegister }) {
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
-    password: '',
-    confirmPassword: ''
+    password: ''
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const validateUsername = (username) => {
-    if (!username.trim()) return 'Username is required';
-    if (username.length < 3) return 'Username must be at least 3 characters';
-    if (username.length > 20) return 'Username must be less than 20 characters';
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) return 'Username can only contain letters, numbers, and underscores';
-    if (!/^[a-zA-Z]/.test(username)) return 'Username must start with a letter';
-    return '';
-  };
 
   const validateEmail = (email) => {
     if (!email.trim()) return 'Email is required';
@@ -43,22 +31,6 @@ function Register({ onSwitchToSignin }) {
   const validatePassword = (password) => {
     if (!password) return 'Password is required';
     if (password.length < 8) return 'Password must be at least 8 characters';
-    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
-    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
-    if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return 'Password must contain at least one special character';
-    
-    // Check if password is same as email
-    if (formData.email && password.toLowerCase() === formData.email.toLowerCase()) {
-      return 'Password cannot be the same as your email address';
-    }
-    
-    return '';
-  };
-
-  const validateConfirmPassword = (confirmPassword) => {
-    if (!confirmPassword) return 'Please confirm your password';
-    if (confirmPassword !== formData.password) return 'Passwords do not match';
     return '';
   };
 
@@ -71,31 +43,11 @@ function Register({ onSwitchToSignin }) {
     // Real-time validation
     let fieldError = '';
     switch (name) {
-      case 'username':
-        fieldError = validateUsername(value);
-        break;
       case 'email':
         fieldError = validateEmail(value);
-        // Also validate password when email changes to check for email-password match
-        if (formData.password) {
-          setValidationErrors(prev => ({
-            ...prev,
-            password: validatePassword(formData.password)
-          }));
-        }
         break;
       case 'password':
         fieldError = validatePassword(value);
-        // Also validate confirm password when password changes
-        if (formData.confirmPassword) {
-          setValidationErrors(prev => ({
-            ...prev,
-            confirmPassword: validateConfirmPassword(formData.confirmPassword)
-          }));
-        }
-        break;
-      case 'confirmPassword':
-        fieldError = validateConfirmPassword(value);
         break;
       default:
         break;
@@ -109,16 +61,19 @@ function Register({ onSwitchToSignin }) {
 
   const validate = () => {
     const errors = {
-      username: validateUsername(formData.username),
       email: validateEmail(formData.email),
-      password: validatePassword(formData.password),
-      confirmPassword: validateConfirmPassword(formData.confirmPassword)
+      password: validatePassword(formData.password)
     };
     
     setValidationErrors(errors);
     
     const hasErrors = Object.values(errors).some(error => error !== '');
     return hasErrors;
+  };
+
+  const getRandomEmoji = () => {
+    const emojis = ['👋', '🎉', '✨', '🚀', '🌟', '💫', '🎊', '🔥', '💪', '😊'];
+    return emojis[Math.floor(Math.random() * emojis.length)];
   };
 
   const handleSubmit = async (e) => {
@@ -129,17 +84,17 @@ function Register({ onSwitchToSignin }) {
     }
     setLoading(true);
     try {
-      const res = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`, {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      });
-      setMessage(res.data.message);
+      const res = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, formData);
+      const emoji = getRandomEmoji();
+      setMessage(`${emoji} Welcome back! Redirecting to your todos...`);
       setError('');
-      setFormData({ username: '', email: '', password: '', confirmPassword: '' });
-      setValidationErrors({});
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('username', res.data.username || 'User');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (err) {
-      console.error('Registration error:', err);
+      console.error('Login error:', err);
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.code === 'ERR_NETWORK') {
@@ -147,36 +102,12 @@ function Register({ onSwitchToSignin }) {
       } else if (err.response?.status === 429) {
         setError('Too many attempts. Please wait a moment and try again.');
       } else {
-        setError('Registration failed. Please check your details and try again.');
+        setError('Login failed. Please check your credentials and try again.');
       }
       setMessage('');
     }
     setLoading(false);
   };
-
-  const getPasswordStrength = (password) => {
-    if (!password) return { strength: 0, color: '#ccc', text: '' };
-    
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
-    
-    const strengthMap = {
-      0: { color: '#ccc', text: '' },
-      1: { color: '#e74c3c', text: 'Very Weak' },
-      2: { color: '#f39c12', text: 'Weak' },
-      3: { color: '#3498db', text: 'Fair' },
-      4: { color: '#2ecc71', text: 'Good' },
-      5: { color: '#27ae60', text: 'Strong' }
-    };
-    
-    return { strength: score, ...strengthMap[score] };
-  };
-
-  const passwordStrength = getPasswordStrength(formData.password);
 
   return (
     <div style={{
@@ -208,19 +139,19 @@ function Register({ onSwitchToSignin }) {
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <i className="fas fa-user-plus" style={{ color: 'white', fontSize: '24px' }}></i>
+            <i className="fas fa-user" style={{ color: 'white', fontSize: '24px' }}></i>
           </div>
           <h1 style={{
             margin: '0 0 8px 0',
             fontSize: '28px',
             fontWeight: '600',
             color: '#333'
-          }}>Create Account</h1>
+          }}>Welcome Back</h1>
           <p style={{
             margin: '0',
             color: '#666',
             fontSize: '14px'
-          }}>Join us and start organizing your life</p>
+          }}>Sign in to your account</p>
         </div>
 
         {/* Messages */}
@@ -259,43 +190,6 @@ function Register({ onSwitchToSignin }) {
               fontWeight: '500',
               color: '#333'
             }}>
-              Username
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Enter your username"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: validationErrors.username ? '2px solid #e74c3c' : '2px solid #e1e5e9',
-                borderRadius: '8px',
-                fontSize: '14px',
-                transition: 'border-color 0.2s',
-                boxSizing: 'border-box'
-              }}
-            />
-            {validationErrors.username && (
-              <div style={{
-                color: '#e74c3c',
-                fontSize: '12px',
-                marginTop: '4px'
-              }}>
-                {validationErrors.username}
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#333'
-            }}>
               Email Address
             </label>
             <input
@@ -325,7 +219,7 @@ function Register({ onSwitchToSignin }) {
             )}
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <label style={{
               display: 'block',
               marginBottom: '8px',
@@ -380,88 +274,6 @@ function Register({ onSwitchToSignin }) {
                 {validationErrors.password}
               </div>
             )}
-            {formData.password && (
-              <div style={{ marginTop: '8px' }}>
-                <div style={{
-                  width: '100%',
-                  height: '4px',
-                  background: '#e1e5e9',
-                  borderRadius: '2px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${(passwordStrength.strength / 5) * 100}%`,
-                    background: passwordStrength.color,
-                    transition: 'width 0.3s'
-                  }}></div>
-                </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: passwordStrength.color,
-                  marginTop: '4px'
-                }}>
-                  {passwordStrength.text}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#333'
-            }}>
-              Confirm Password
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  paddingRight: '48px',
-                  border: validationErrors.confirmPassword ? '2px solid #e74c3c' : '2px solid #e1e5e9',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  transition: 'border-color 0.2s',
-                  boxSizing: 'border-box'
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: '#666',
-                  cursor: 'pointer',
-                  fontSize: '16px'
-                }}
-              >
-                <i className={`fas fa-${showConfirmPassword ? 'eye-slash' : 'eye'}`}></i>
-              </button>
-            </div>
-            {validationErrors.confirmPassword && (
-              <div style={{
-                color: '#e74c3c',
-                fontSize: '12px',
-                marginTop: '4px'
-              }}>
-                {validationErrors.confirmPassword}
-              </div>
-            )}
           </div>
 
           <button
@@ -481,7 +293,7 @@ function Register({ onSwitchToSignin }) {
               transition: 'opacity 0.2s'
             }}
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
@@ -497,9 +309,9 @@ function Register({ onSwitchToSignin }) {
             color: '#666',
             fontSize: '14px'
           }}>
-            Already have an account?{' '}
+            Don't have an account?{' '}
             <button
-              onClick={onSwitchToSignin}
+              onClick={onSwitchToRegister}
               style={{
                 background: 'none',
                 border: 'none',
@@ -510,7 +322,7 @@ function Register({ onSwitchToSignin }) {
                 textDecoration: 'underline'
               }}
             >
-              Sign In
+              Sign Up
             </button>
           </p>
         </div>
@@ -519,4 +331,4 @@ function Register({ onSwitchToSignin }) {
   );
 }
 
-export default Register;
+export default Signin; 

@@ -33,11 +33,19 @@ const registerSchema = Joi.object({
   password: Joi.string()
     .min(8)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]/)
+    .custom((value, helpers) => {
+      const email = helpers.state.ancestors[0].email;
+      if (email && value.toLowerCase() === email.toLowerCase()) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    })
     .required()
     .messages({
       'string.min': 'Password must be at least 8 characters long',
       'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-      'any.required': 'Password is required'
+      'any.required': 'Password is required',
+      'any.invalid': 'Password cannot be the same as your email address'
     })
 });
 

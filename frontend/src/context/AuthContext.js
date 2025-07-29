@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import API_CONFIG from '../config';
 
 const AuthContext = createContext();
 
@@ -40,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5001/api/login', {
+      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
         email,
         password
       });
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post('http://localhost:5001/api/register', {
+      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`, {
         username,
         email,
         password
@@ -104,7 +105,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put('http://localhost:5001/api/profile', profileData);
+      const response = await axios.put(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROFILE}`, profileData);
       
       // Update username in localStorage if it changed
       if (response.data.username && response.data.username !== user.username) {
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }) => {
 
   const getProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/profile');
+      const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROFILE}`);
       return { success: true, profile: response.data };
     } catch (error) {
       return { 
